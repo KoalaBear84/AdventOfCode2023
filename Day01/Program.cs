@@ -20,27 +20,32 @@ stopwatch.Restart();
 
 Regex star2Regex = Star2Regex();
 
+// SPOILER: 'twone' -> '21' needs to also be supported
+
 for (int i = 0; i < inputLines.Count; i++)
 {
-	inputLines[i] = star2Regex.Replace(inputLines[i], match => match.Value switch
+	// Sadly Regex.Replace doesn't really work with lookaheads so instead it 'adds' all the results
+	inputLines[i] = star2Regex.Replace(inputLines[i], match =>
 	{
-		"one" => "1",
-		"two" => "2",
-		"three" => "3",
-		"four" => "4",
-		"five" => "5",
-		"six" => "6",
-		"seven" => "7",
-		"eight" => "8",
-		"nine" => "9",
-		_ => string.Empty,
+		return string.Join(string.Empty, match.Groups.Values.Select(group => group.Value switch
+		{
+			"one" => "1",
+			"two" => "2",
+			"three" => "3",
+			"four" => "4",
+			"five" => "5",
+			"six" => "6",
+			"seven" => "7",
+			"eight" => "8",
+			"nine" => "9",
+			_ => string.Empty,
+		}));
 	});
 }
 
 int star2 = CalculateSum(inputLines);
 
-// Answer: 53519 (Too high)
-// Answer: ???
+// Answer: 53515
 ConsoleEx.WriteLine($"Star 2. {stopwatch.Elapsed.Microseconds / 1000d:n2}ms. Answer: {star2}", ConsoleColor.Yellow);
 
 ConsoleEx.WriteLine("END", ConsoleColor.Green);
@@ -76,6 +81,6 @@ static int CalculateSum(List<string> inputLines)
 
 partial class Program
 {
-	[GeneratedRegex("(one|two|three|four|five|six|seven|eight|nine)")]
+	[GeneratedRegex("(?=(one|two|three|four|five|six|seven|eight|nine))")]
 	private static partial Regex Star2Regex();
 }
