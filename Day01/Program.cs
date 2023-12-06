@@ -25,22 +25,19 @@ Regex star2Regex = Star2Regex();
 for (int i = 0; i < inputLines.Count; i++)
 {
 	// Sadly Regex.Replace doesn't really work with lookaheads so instead it 'adds' all the results
-	inputLines[i] = star2Regex.Replace(inputLines[i], match =>
+	inputLines[i] = star2Regex.Replace(inputLines[i], match => string.Join(string.Empty, match.Groups.Values.Select(group => group.Value switch
 	{
-		return string.Join(string.Empty, match.Groups.Values.Select(group => group.Value switch
-		{
-			"one" => "1",
-			"two" => "2",
-			"three" => "3",
-			"four" => "4",
-			"five" => "5",
-			"six" => "6",
-			"seven" => "7",
-			"eight" => "8",
-			"nine" => "9",
-			_ => string.Empty,
-		}));
-	});
+		"one" => "1",
+		"two" => "2",
+		"three" => "3",
+		"four" => "4",
+		"five" => "5",
+		"six" => "6",
+		"seven" => "7",
+		"eight" => "8",
+		"nine" => "9",
+		_ => string.Empty,
+	})));
 }
 
 int star2 = CalculateSum(inputLines);
