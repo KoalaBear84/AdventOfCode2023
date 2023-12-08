@@ -6,20 +6,18 @@ string title = "AdventOfCode2023 - Day 02";
 Console.Title = title;
 ConsoleEx.WriteLine(title, ConsoleColor.Green);
 
-List<string> inputLines = [.. (await File.ReadAllLinesAsync("inputtest.txt"))];
+List<string> inputLines = [.. (await File.ReadAllLinesAsync("input.txt"))];
 
 Stopwatch stopwatch = Stopwatch.StartNew();
 
 Regex gameRegex = GameRegex();
 
-Dictionary<string, int> maxDisplays = new Dictionary<string, int>
+Dictionary<string, int> maxDisplays = new()
 {
 	{ "red", 12 },
 	{ "green", 13 },
 	{ "blue", 14 }
 };
-
-//Dictionary<int, Dictionary<string, MinMax>> games = [];
 
 Dictionary<int, Game> games = [];
 
@@ -55,10 +53,16 @@ IEnumerable<KeyValuePair<int, Game>> validGamesStar1 = games.Where(x => x.Value.
 // Answer: 2449
 ConsoleEx.WriteLine($"Star 1. {stopwatch.Elapsed.Microseconds / 1000d:n2}ms. Answer: {validGamesStar1.Select(x => x.Key).Sum()}", ConsoleColor.Yellow);
 
+int star2 = games
+		.Select(x => x.Value.Displays.SelectMany(x => x.Colors)
+		.GroupBy(x => x.Key))
+		.Select(x => x.Select(x => x.Max(x => x.Value)))
+		.Select(x => x.Aggregate((x, y) => x * y)).Sum();
+
 stopwatch.Restart();
 
-// Answer: 
-ConsoleEx.WriteLine($"Star 2. {stopwatch.Elapsed.Microseconds / 1000d:n2}ms. Answer: ", ConsoleColor.Yellow);
+// Answer: 63981
+ConsoleEx.WriteLine($"Star 2. {stopwatch.Elapsed.Microseconds / 1000d:n2}ms. Answer: {star2}", ConsoleColor.Yellow);
 
 ConsoleEx.WriteLine("END", ConsoleColor.Green);
 Console.ReadKey();
@@ -74,7 +78,6 @@ partial class Program
 
 public class Game
 {
-	public int Number { get; set; } = 0;
 	public List<Display> Displays { get; set; } = [];
 }
 
@@ -82,15 +85,3 @@ public class Display
 {
 	public Dictionary<string, int> Colors { get; set; } = [];
 }
-
-//public class MinMax
-//{
-//	public MinMax(int min, int max)
-//	{
-//		Min = min;
-//		Max = max;
-//	}
-
-//	public int Min { get; set; }
-//	public int Max { get; set; }
-//}
