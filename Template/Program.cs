@@ -5,7 +5,7 @@ string title = "AdventOfCode2023 - Day XX";
 Console.Title = title;
 ConsoleEx.WriteLine(title, ConsoleColor.Green);
 
-List<string> inputLines = (await File.ReadAllLinesAsync("inputtest.txt")).ToList();
+List<string> inputLines = [.. (await File.ReadAllLinesAsync("inputtest.txt"))];
 
 Stopwatch stopwatch = Stopwatch.StartNew();
 
