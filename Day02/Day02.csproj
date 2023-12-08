@@ -5,7 +5,16 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ApplicationIcon>AdventOfCode.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="AdventOfCode.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="AdventOfCode.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj" />
