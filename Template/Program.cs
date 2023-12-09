@@ -15,12 +15,12 @@ foreach (string input in inputLines)
 }
 
 // Answer: 
-ConsoleEx.WriteLine($"Star 1. {stopwatch.Elapsed.Microseconds / 1000d:n2}ms. Answer: ", ConsoleColor.Yellow);
+ConsoleEx.WriteLine($"Star 1. {(double)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:n2}ms. Answer: ", ConsoleColor.Yellow);
 
 stopwatch.Restart();
 
 // Answer: 
-ConsoleEx.WriteLine($"Star 2. {stopwatch.Elapsed.Microseconds / 1000d:n2}ms. Answer: ", ConsoleColor.Yellow);
+ConsoleEx.WriteLine($"Star 2. {(double)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:n2}ms. Answer: ", ConsoleColor.Yellow);
 
 ConsoleEx.WriteLine("END", ConsoleColor.Green);
 Console.ReadKey();

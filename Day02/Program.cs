@@ -51,7 +51,7 @@ foreach (string input in inputLines)
 IEnumerable<KeyValuePair<int, Game>> validGamesStar1 = games.Where(x => x.Value.Displays.All(x => x.Colors.All(x => maxDisplays[x.Key] >= x.Value)));
 
 // Answer: 2449
-ConsoleEx.WriteLine($"Star 1. {stopwatch.Elapsed.Microseconds / 1000d:n2}ms. Answer: {validGamesStar1.Select(x => x.Key).Sum()}", ConsoleColor.Yellow);
+ConsoleEx.WriteLine($"Star 1. {(double)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:n2}ms. Answer: {validGamesStar1.Select(x => x.Key).Sum()}", ConsoleColor.Yellow);
 
 int star2 = games
 		.Select(x => x.Value.Displays.SelectMany(x => x.Colors)
@@ -62,7 +62,7 @@ int star2 = games
 stopwatch.Restart();
 
 // Answer: 63981
-ConsoleEx.WriteLine($"Star 2. {stopwatch.Elapsed.Microseconds / 1000d:n2}ms. Answer: {star2}", ConsoleColor.Yellow);
+ConsoleEx.WriteLine($"Star 2. {(double)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:n2}ms. Answer: {star2}", ConsoleColor.Yellow);
 
 ConsoleEx.WriteLine("END", ConsoleColor.Green);
 Console.ReadKey();
