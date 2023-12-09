@@ -30,13 +30,13 @@ int height = grid.GetUpperBound(0);
 
 List<int> validParts = [];
 
-for (int y = 0; y <= width; y++)
+for (int y = 0; y <= height; y++)
 {
 	string numberString = string.Empty;
 	int number = 0;
 	bool hasSymbol = false;
 
-	for (int x = 0; x <= height; x++)
+	for (int x = 0; x <= width; x++)
 	{
 		char c = grid[y, x];
 
