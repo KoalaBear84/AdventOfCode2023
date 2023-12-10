@@ -14,7 +14,7 @@ Stopwatch stopwatch = Stopwatch.StartNew();
 int star1 = CalculateSum(inputLines);
 
 // Answer: 54388
-ConsoleEx.WriteLine($"Star 1. {(double)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:n2}ms. Answer: {star1}", ConsoleColor.Yellow);
+ConsoleEx.WriteLine($"Star 1. {TimerHelper.GetMilliseconds(stopwatch):n2}ms. Answer: {star1}", ConsoleColor.Yellow);
 
 stopwatch.Restart();
 
@@ -43,7 +43,7 @@ for (int i = 0; i < inputLines.Count; i++)
 int star2 = CalculateSum(inputLines);
 
 // Answer: 53515
-ConsoleEx.WriteLine($"Star 2. {(double)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:n2}ms. Answer: {star2}", ConsoleColor.Yellow);
+ConsoleEx.WriteLine($"Star 2. {TimerHelper.GetMilliseconds(stopwatch):n2}ms. Answer: {star2}", ConsoleColor.Yellow);
 
 ConsoleEx.WriteLine("END", ConsoleColor.Green);
 Console.ReadKey();

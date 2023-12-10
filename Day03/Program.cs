@@ -79,7 +79,7 @@ for (int y = 0; y <= height; y++)
 }
 
 // Answer: 535351
-ConsoleEx.WriteLine($"Star 1. {(double)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:n2}ms. Answer: {validParts.Sum()}", ConsoleColor.Yellow);
+ConsoleEx.WriteLine($"Star 1. {TimerHelper.GetMilliseconds(stopwatch):n2}ms. Answer: {validParts.Sum()}", ConsoleColor.Yellow);
 
 stopwatch.Restart();
 
@@ -113,7 +113,7 @@ for (int y = 0; y <= height; y++)
 }
 
 // Answer: 87287096
-ConsoleEx.WriteLine($"Star 2. {(double)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:n2}ms. Answer: {gearRatios.Sum()}", ConsoleColor.Yellow);
+ConsoleEx.WriteLine($"Star 2. {TimerHelper.GetMilliseconds(stopwatch):n2}ms. Answer: {gearRatios.Sum()}", ConsoleColor.Yellow);
 
 ConsoleEx.WriteLine("END", ConsoleColor.Green);
 Console.ReadKey();

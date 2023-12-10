@@ -39,7 +39,7 @@ foreach (KeyValuePair<int, int> cardPoint in cardPoints)
 int star1 = cardPoints.Sum(x => x.Value);
 
 // Answer: 
-ConsoleEx.WriteLine($"Star 1. {(double)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:n2}ms. Answer: {star1}", ConsoleColor.Yellow);
+ConsoleEx.WriteLine($"Star 1. {TimerHelper.GetMilliseconds(stopwatch):n2}ms. Answer: {star1}", ConsoleColor.Yellow);
 
 stopwatch.Restart();
 
@@ -93,7 +93,7 @@ Console.WriteLine($"Total Matches: {totalMatches}");
 Console.WriteLine($"Total Points: {totalPoints}");
 
 // Answer: 5037841
-ConsoleEx.WriteLine($"Star 2. {(double)stopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond:n2}ms. Answer: {star2}", ConsoleColor.Yellow);
+ConsoleEx.WriteLine($"Star 2. {TimerHelper.GetMilliseconds(stopwatch):n2}ms. Answer: {star2}", ConsoleColor.Yellow);
 
 ConsoleEx.WriteLine("END", ConsoleColor.Green);
 Console.ReadKey();
