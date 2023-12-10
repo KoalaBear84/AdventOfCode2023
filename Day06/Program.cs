@@ -9,47 +9,58 @@ List<string> inputLines = [.. (await File.ReadAllLinesAsync("input.txt"))];
 
 Stopwatch stopwatch = Stopwatch.StartNew();
 
-List<int> times = inputLines[0].Split(":").Last().Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
-List<int> distances = inputLines[1].Split(":").Last().Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
+List<long> times = inputLines[0].Split(":").Last().Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToList();
+List<long> distances = inputLines[1].Split(":").Last().Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToList();
 
-int star1 = -1;
+int star1 = ProcessRaces();
 
-for (int i = 0; i < times.Count; i++)
-{
-	int time = times[i];
-	int distance = distances[i];
-
-	int waysToWin = GetDistancesAbove(time, distance);
-
-	if (star1 == -1)
-	{
-		star1 = waysToWin;
-	} else
-	{
-		star1 *= waysToWin;
-	}
-}
-
-// Answer: 
+// Answer: 160816
 ConsoleEx.WriteLine($"Star 1. {TimerHelper.GetMilliseconds(stopwatch):n2}ms. Answer: {star1}", ConsoleColor.Yellow);
 
 stopwatch.Restart();
 
-int star2 = -1;
+times = [long.Parse(string.Join(string.Empty, times))];
+distances = [long.Parse(string.Join(string.Empty, distances))];
 
-// Answer: 
+int star2 = ProcessRaces();
+
+// Answer: 46561107
 ConsoleEx.WriteLine($"Star 2. {TimerHelper.GetMilliseconds(stopwatch):n2}ms. Answer: {star2}", ConsoleColor.Yellow);
 
 ConsoleEx.WriteLine("END", ConsoleColor.Green);
 Console.ReadKey();
 
-int GetDistancesAbove(int raceTime, int distance)
+int ProcessRaces()
+{
+	int answer = -1;
+
+	for (int i = 0; i < times.Count; i++)
+	{
+		long time = times[i];
+		long distance = distances[i];
+
+		int waysToWin = GetDistancesAbove(time, distance);
+
+		if (answer == -1)
+		{
+			answer = waysToWin;
+		}
+		else
+		{
+			answer *= waysToWin;
+		}
+	}
+
+	return answer;
+}
+
+int GetDistancesAbove(long raceTime, long distance)
 {
 	int waysToWin = 0;
 
-	for (int time = 1; time < raceTime; time++)
+	for (long time = 1; time < raceTime; time++)
 	{
-		int traveledDistance = (raceTime - time) * time;
+		long traveledDistance = (raceTime - time) * time;
 
 		if (traveledDistance > distance)
 		{
