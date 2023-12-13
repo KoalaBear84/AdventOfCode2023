@@ -193,11 +193,23 @@ void DrawGrid(int maxDistance)
 		for (int x = 0; x <= grid.GetUpperBound(Dimension_X); x++)
 		{
 			int distance = distances[x, y];
-			Point point = new(x, y);
+			char c = grid[x, y];
+
+			if (distance == maxDistance || c == 'S')
+			{
+				ConsoleEx.WriteRgb($"{ConvertChar(c)}", Color.Red);
+				continue;
+			}
+
+			if (distance == -1)
+			{
+				Console.Write(ConvertChar(c));
+				continue;
+			}
 
 			int green = (int)(200d / maxDistance * distance) + 55;
 
-			ConsoleEx.WriteRgb($"{ConvertChar(grid[x, y])}", Color.FromArgb(0, green, 0));
+			ConsoleEx.WriteRgb($"{ConvertChar(c)}", Color.FromArgb(0, green, 0));
 		}
 
 		Console.WriteLine();
