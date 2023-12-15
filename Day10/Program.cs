@@ -43,7 +43,7 @@ for (int y = 0; y < inputLines.Count; y++)
 	}
 }
 
-UndirectedGraph<Point, Edge<Point>> g = new();
+UndirectedGraph<Point, Edge<Point>> graph = new();
 
 for (int y = 0; y <= grid.GetUpperBound(Dimension_Y); y++)
 {
@@ -64,15 +64,15 @@ for (int y = 0; y <= grid.GetUpperBound(Dimension_Y); y++)
 				_ => throw new NotImplementedException()
 			};
 
-			g.AddVerticesAndEdge(new Edge<Point>(point, newPoint));
+			graph.AddVerticesAndEdge(new Edge<Point>(point, newPoint));
 		}
 	}
 }
 
 // Save to Graphviz file (Needs QuickGraph.Graphviz nuget)
-//File.WriteAllText("GraphViz.gv", g.ToGraphviz());
+//File.WriteAllText("GraphViz.gv", graph.ToGraphviz());
 
-UndirectedBreadthFirstSearchAlgorithm<Point, Edge<Point>> algorithm = new(g);
+UndirectedBreadthFirstSearchAlgorithm<Point, Edge<Point>> algorithm = new(graph);
 algorithm.Compute(startPosition);
 
 // More debugging tools
@@ -88,7 +88,9 @@ int star1 = -1;
 Func<Edge<Point>, double> edgeCost = edge => 1; // Constant cost
 
 // Compute shortest paths
-TryFunc<Point, IEnumerable<Edge<Point>>> tryGetPaths = g.ShortestPathsDijkstra(edgeCost, startPosition);
+TryFunc<Point, IEnumerable<Edge<Point>>> tryGetPaths = graph.ShortestPathsDijkstra(edgeCost, startPosition);
+
+Dictionary<string, GraphColor> colors = algorithm.VerticesColors.Select(x => ($"{x.Key.X},{x.Key.Y}", x.Value)).ToDictionary();
 
 for (int y = 0; y <= distances.GetUpperBound(Dimension_Y); y++)
 {
@@ -96,9 +98,9 @@ for (int y = 0; y <= distances.GetUpperBound(Dimension_Y); y++)
 	{
 		Point point = new(x, y);
 
-		KeyValuePair<Point, GraphColor> verticeColor = algorithm.VerticesColors.FirstOrDefault(x => point.X == x.Key.X && point.Y == x.Key.Y);
+		colors.TryGetValue($"{point.X},{point.Y}", out GraphColor verticeColor);
 
-		bool isConnected = verticeColor.Value == GraphColor.Black;
+		bool isConnected = verticeColor == GraphColor.Black;
 
 		if (tryGetPaths(point, out IEnumerable<Edge<Point>>? path))
 		{
