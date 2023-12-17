@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Drawing;
 using QuikGraph.Algorithms;
 using QuikGraph.Algorithms.Search;
+using QuikGraph.Algorithms.Observers;
+using System.Diagnostics.CodeAnalysis;
 
 string title = "AdventOfCode2023 - Day 10";
 Console.Title = title;
@@ -44,12 +46,14 @@ for (int y = 0; y < inputLines.Count; y++)
 }
 
 UndirectedGraph<Point, Edge<Point>> graph = new();
+HashSet<Point> enclosedPoints = [];
 
 for (int y = 0; y <= grid.GetUpperBound(Dimension_Y); y++)
 {
 	for (int x = 0; x <= grid.GetUpperBound(Dimension_X); x++)
 	{
 		Point point = new(x, y);
+		enclosedPoints.Add(point);
 
 		IEnumerable<Direction> directions = GetDirections(point);
 
@@ -76,12 +80,12 @@ UndirectedBreadthFirstSearchAlgorithm<Point, Edge<Point>> algorithm = new(graph)
 algorithm.Compute(startPosition);
 
 // More debugging tools
-//UndirectedVertexPredecessorRecorderObserver<Point, Edge<Point>> observer = new();
+UndirectedVertexPredecessorRecorderObserver<Point, Edge<Point>> observer = new();
 
-//using (observer.Attach(algorithm))
-//{
-//	algorithm.Compute(startPosition);
-//}
+using (observer.Attach(algorithm))
+{
+	algorithm.Compute(startPosition);
+}
 
 int star1 = -1;
 
@@ -102,6 +106,12 @@ for (int y = 0; y <= distances.GetUpperBound(Dimension_Y); y++)
 
 		bool isConnected = verticeColor == GraphColor.Black;
 
+		if (!isConnected)
+		{
+			graph.RemoveVertex(point);
+			continue;
+		}
+
 		if (tryGetPaths(point, out IEnumerable<Edge<Point>>? path))
 		{
 			int distance = path.Count();
@@ -111,6 +121,9 @@ for (int y = 0; y <= distances.GetUpperBound(Dimension_Y); y++)
 	}
 }
 
+Point currentPoint = graph.Vertices.OrderBy(vertice => vertice.Y).ThenBy(vertice => vertice.X).First();
+Direction currentDirection = Direction.East;
+
 DrawGrid(star1);
 //DrawDistances();
 
@@ -119,9 +132,62 @@ ConsoleEx.WriteLine($"Star 1. {TimerHelper.GetMilliseconds(stopwatch):n2}ms. Ans
 
 stopwatch.Restart();
 
-int star2 = -1;
+// Code for star 2 went mental
 
-// Answer: 
+HashSet<Point> visitedPoints = [currentPoint];
+
+int connectedNodes = colors.Where(x => x.Value == GraphColor.Black).Count();
+
+CheckEnclosedPoints(ConvertStart('S', currentPoint), false);
+
+while (visitedPoints.Count != graph.VertexCount)
+{
+	//char c = grid[currentPoint.X, currentPoint.Y];
+
+	List<Direction> possibleDirections = GetDirections(currentPoint).Where(direction =>
+		currentDirection is Direction.North && direction is Direction.North or Direction.East ||
+		currentDirection is Direction.East && direction is Direction.East or Direction.West ||
+		currentDirection is Direction.South && direction is Direction.South or Direction.West ||
+		currentDirection is Direction.West && direction is Direction.West or Direction.North
+	).ToList();
+
+	Point loopPoint = currentPoint;
+
+	foreach (Direction direction in possibleDirections)
+	{
+		Point point = direction switch
+		{
+			Direction.North => new(loopPoint.X, loopPoint.Y - 1),
+			Direction.East => new(loopPoint.X + 1, loopPoint.Y),
+			Direction.South => new(loopPoint.X, loopPoint.Y + 1),
+			Direction.West => new(loopPoint.X - 1, loopPoint.Y),
+			_ => throw new NotImplementedException()
+		};
+
+		if (visitedPoints.Contains(point))
+		{
+			continue;
+		}
+
+		visitedPoints.Add(point);
+
+		currentPoint = point;
+
+		// Debugging
+		//Console.WriteLine(currentDirection);
+		//DrawGrid(star1, point);
+
+		char c = ConvertStart(grid[currentPoint.X, currentPoint.Y], currentPoint);
+
+		CheckEnclosedPoints(c);
+	}
+}
+
+DrawGrid(star1);
+
+int star2 = enclosedPoints.Count - graph.VertexCount;
+
+// Answer: 357
 ConsoleEx.WriteLine($"Star 2. {TimerHelper.GetMilliseconds(stopwatch):n2}ms. Answer: {star2}", ConsoleColor.Yellow);
 
 ConsoleEx.WriteLine("END", ConsoleColor.Green);
@@ -160,7 +226,7 @@ IEnumerable<Direction> GetDirections(Point point)
 		}
 	}
 
-	if (point.X < grid.GetUpperBound(0) - 1)
+	if (point.X < grid.GetUpperBound(Dimension_X))
 	{
 		char target = grid[point.X + 1, point.Y];
 
@@ -171,7 +237,7 @@ IEnumerable<Direction> GetDirections(Point point)
 		}
 	}
 
-	if (point.Y < grid.GetUpperBound(1) - 1)
+	if (point.Y < grid.GetUpperBound(Dimension_Y))
 	{
 		char target = grid[point.X, point.Y + 1];
 
@@ -188,14 +254,20 @@ Direction GetDirection(Direction source, Point point)
 	return GetDirections(point).Where(x => x != source).FirstOrDefault();
 }
 
-void DrawGrid(int maxDistance)
+void DrawGrid(int maxDistance, Point? currentPoint = null)
 {
 	for (int y = 0; y <= grid.GetUpperBound(Dimension_Y); y++)
 	{
 		for (int x = 0; x <= grid.GetUpperBound(Dimension_X); x++)
 		{
+			Point point = new(x, y);
 			int distance = distances[x, y];
 			char c = grid[x, y];
+
+			if (point == currentPoint)
+			{
+				Console.BackgroundColor = ConsoleColor.Yellow;
+			}
 
 			if (distance == maxDistance || c == 'S')
 			{
@@ -205,7 +277,14 @@ void DrawGrid(int maxDistance)
 
 			if (distance == -1)
 			{
-				Console.Write(ConvertChar(c));
+				if (enclosedPoints.Contains(new Point(x, y)))
+				{
+					ConsoleEx.WriteRgb($"{ConvertChar(c)}", Color.FromArgb(255, 0, 255));
+				}
+				else
+				{
+					Console.Write(ConvertChar(c));
+				}
 				continue;
 			}
 
@@ -216,6 +295,15 @@ void DrawGrid(int maxDistance)
 
 		Console.WriteLine();
 	}
+}
+
+bool IsPointConnected(Point point)
+{
+	colors.TryGetValue($"{point.X},{point.Y}", out GraphColor verticeColor);
+
+	bool isConnected = verticeColor == GraphColor.Black;
+
+	return isConnected;
 }
 
 void DrawDistances()
@@ -247,6 +335,141 @@ void DrawDistances()
 	}
 }
 
+void CheckDirection(Direction direction, Point startPosition)
+{
+	if (direction.HasFlag(Direction.North) && direction.HasFlag(Direction.East))
+	{
+		for (int y = startPosition.Y - 1; y >= 0; y--)
+		{
+			for (int x = startPosition.X + 1; x <= grid.GetUpperBound(Dimension_X); x++)
+			{
+				Point point = new(x, y);
+
+				if (IsPointConnected(point))
+				{
+					return;
+				}
+
+				enclosedPoints.Remove(point);
+			}
+		}
+	}
+
+	if (direction.HasFlag(Direction.East) && direction.HasFlag(Direction.South))
+	{
+		for (int x = startPosition.X + 1; x <= grid.GetUpperBound(Dimension_X); x++)
+		{
+			for (int y = startPosition.Y + 1; y <= grid.GetUpperBound(Dimension_Y); y++)
+			{
+				Point point = new(x, y);
+
+				if (IsPointConnected(point))
+				{
+					return;
+				}
+
+				enclosedPoints.Remove(point);
+			}
+		}
+	}
+
+	if (direction.HasFlag(Direction.South) && direction.HasFlag(Direction.West))
+	{
+		for (int y = startPosition.Y + 1; y <= grid.GetUpperBound(Dimension_Y); y++)
+		{
+			for (int x = startPosition.X - 1; x >= 0; x--)
+			{
+				Point point = new(x, y);
+
+				if (IsPointConnected(point))
+				{
+					return;
+				}
+
+				enclosedPoints.Remove(point);
+			}
+		}
+	}
+
+	if (direction.HasFlag(Direction.West) && direction.HasFlag(Direction.North))
+	{
+		for (int x = startPosition.X - 1; x >= 0; x--)
+		{
+			for (int y = startPosition.Y - 1; y >= 0; y--)
+			{
+				Point point = new(x, y);
+
+				if (IsPointConnected(point))
+				{
+					return;
+				}
+
+				enclosedPoints.Remove(point);
+			}
+		}
+	}
+
+	if (direction is Direction.North)
+	{
+		for (int y = startPosition.Y - 1; y >= 0; y--)
+		{
+			Point point = new(startPosition.X, y);
+
+			if (IsPointConnected(point))
+			{
+				return;
+			}
+
+			enclosedPoints.Remove(point);
+		}
+	}
+
+	if (direction is Direction.East)
+	{
+		for (int x = startPosition.X + 1; x <= grid.GetUpperBound(Dimension_X); x++)
+		{
+			Point point = new(x, startPosition.Y);
+
+			if (IsPointConnected(point))
+			{
+				return;
+			}
+
+			enclosedPoints.Remove(point);
+		}
+	}
+
+	if (direction is Direction.South)
+	{
+		for (int y = startPosition.Y + 1; y <= grid.GetUpperBound(Dimension_Y); y++)
+		{
+			Point point = new(startPosition.X, y);
+
+			if (IsPointConnected(point))
+			{
+				return;
+			}
+
+			enclosedPoints.Remove(point);
+		}
+	}
+
+	if (direction is Direction.West)
+	{
+		for (int x = startPosition.X - 1; x >= 0; x--)
+		{
+			Point point = new(x, startPosition.Y);
+
+			if (IsPointConnected(point))
+			{
+				return;
+			}
+
+			enclosedPoints.Remove(point);
+		}
+	}
+}
+
 static string ConvertChars(string input)
 {
 	return new string(input.Select(ConvertChar).ToArray());
@@ -268,10 +491,131 @@ static char ConvertChar(char c)
 	};
 }
 
-enum Direction
+char ConvertStart(char c, Point point)
 {
-	North,
-	East,
-	South,
-	West
+	if (c is 'S')
+	{
+		IEnumerable<Direction> startDirections = GetDirections(point);
+
+		if (startDirections.Contains(Direction.East) && startDirections.Contains(Direction.South))
+		{
+			c = 'F';
+		}
+
+		if (startDirections.Contains(Direction.West) && startDirections.Contains(Direction.South))
+		{
+			c = '7';
+		}
+
+		if (startDirections.Contains(Direction.North) && startDirections.Contains(Direction.West))
+		{
+			c = 'J';
+		}
+
+		if (startDirections.Contains(Direction.North) && startDirections.Contains(Direction.East))
+		{
+			c = 'L';
+		}
+	}
+
+	return c;
+}
+
+void CheckEnclosedPoints(char c, bool changeDirection = true)
+{
+	switch (c)
+	{
+		case 'F':
+			// Check on west and north, until connected node
+			if (currentDirection is Direction.North or Direction.East)
+			{
+				CheckDirection(Direction.North, currentPoint);
+				CheckDirection(Direction.West, currentPoint);
+				CheckDirection(Direction.North | Direction.West, currentPoint);
+			}
+
+			currentDirection = changeDirection ? (currentDirection is Direction.North ? Direction.East : Direction.South) : currentDirection;
+			//Console.WriteLine($"Going to {currentDirection}");
+			break;
+
+		case '7':
+			// Check north and east, until connected node
+			if (currentDirection is Direction.East)
+			{
+				CheckDirection(Direction.North, currentPoint);
+				CheckDirection(Direction.East, currentPoint);
+				CheckDirection(Direction.North | Direction.East, currentPoint);
+			}
+
+			currentDirection = changeDirection ? (currentDirection is Direction.East ? Direction.South : Direction.West) : currentDirection;
+			//Console.WriteLine($"Going to {currentDirection}");
+			break;
+
+		case 'J':
+			// Check east and south, until connected node
+			if (currentDirection is Direction.South)
+			{
+				CheckDirection(Direction.East, currentPoint);
+				CheckDirection(Direction.South, currentPoint);
+				CheckDirection(Direction.East | Direction.South, currentPoint);
+			}
+
+			currentDirection = changeDirection ? (currentDirection is Direction.South ? Direction.West : Direction.North) : currentDirection;
+			//Console.WriteLine($"Going to {currentDirection}");
+			break;
+
+		case 'L':
+			// Check south and west, until connected node
+			if (currentDirection is Direction.West)
+			{
+				CheckDirection(Direction.South, currentPoint);
+				CheckDirection(Direction.West, currentPoint);
+				CheckDirection(Direction.South | Direction.West, currentPoint);
+			}
+
+			currentDirection = changeDirection ? (currentDirection is Direction.South ? Direction.East : Direction.North) : currentDirection;
+			//Console.WriteLine($"Going to {currentDirection}");
+			break;
+
+		case '-':
+			// currentDirection is East, check north, until connected node
+			// currentDirection is West, check south, until connected node
+
+			if (currentDirection is Direction.East)
+			{
+				CheckDirection(Direction.North, currentPoint);
+			}
+
+			if (currentDirection is Direction.West)
+			{
+				CheckDirection(Direction.South, currentPoint);
+			}
+
+			break;
+
+		case '|':
+			// currentDirection is south, check east, until connected node
+			// currentDirection is north, check west, until connected node
+
+			if (currentDirection is Direction.South)
+			{
+				CheckDirection(Direction.East, currentPoint);
+			}
+
+			if (currentDirection is Direction.North)
+			{
+				CheckDirection(Direction.West, currentPoint);
+			}
+
+			break;
+	}
+}
+
+[Flags]
+public enum Direction
+{
+	North = 1,
+	East = 2,
+	South = 4,
+	West = 8
 }
