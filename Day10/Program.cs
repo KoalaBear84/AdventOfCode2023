@@ -5,7 +5,6 @@ using System.Drawing;
 using QuikGraph.Algorithms;
 using QuikGraph.Algorithms.Search;
 using QuikGraph.Algorithms.Observers;
-using System.Diagnostics.CodeAnalysis;
 
 string title = "AdventOfCode2023 - Day 10";
 Console.Title = title;
