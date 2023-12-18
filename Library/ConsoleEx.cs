@@ -33,6 +33,18 @@ public static class ConsoleEx
 		Console.ResetColor();
 	}
 
+	public static void WriteRgb(char c, Color color)
+	{
+		if (!FullColorEnabled)
+		{
+			EnableFullColors();
+		}
+
+		Console.Write($"\x1b[38;2;{color.R};{color.G};{color.B}m");
+		Console.Write(c);
+		Console.ResetColor();
+	}
+
 	[DllImport("kernel32.dll", SetLastError = true)]
 	public static extern bool SetConsoleMode(IntPtr hConsoleHandle, int mode);
 
